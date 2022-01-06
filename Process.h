@@ -20,4 +20,6 @@ void setBurstTime(Process *process, bool period, unsigned int burstTime);
 unsigned int getIOTime(Process *process);
 void setIOTime(Process *process, unsigned int io_time);
 
+Process* createProcess(unsigned int pid, unsigned int at,
+					   unsigned int bt_1, unsigned int iot, unsigned int bt_2);
 #endif //OS_PROJECT_CPU_SCHEDULING_ALGORITHMS_PROCESS_H
