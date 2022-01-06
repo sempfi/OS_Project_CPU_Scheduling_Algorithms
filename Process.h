@@ -5,19 +5,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-struct Process;
+// struct Process;
 typedef struct Process Process;
 
-unsigned int getProcessID(Process *process);
+unsigned int getProcessID(const Process *process);
 void setProcessID(Process *process, unsigned int _pid);
 
-unsigned int getArrivalTime(Process *process);
+unsigned int getArrivalTime(const Process *process);
 void setArrivalTime(Process *process, unsigned int arrivalTime);
 
-unsigned int getBurstTime(Process *process, bool period);
+unsigned int getBurstTime(const Process *process, bool period);
 void setBurstTime(Process *process, bool period, unsigned int burstTime);
 
-unsigned int getIOTime(Process *process);
+unsigned int getIOTime(const Process *process);
 void setIOTime(Process *process, unsigned int io_time);
 
 Process* createProcess(unsigned int pid, unsigned int at,
