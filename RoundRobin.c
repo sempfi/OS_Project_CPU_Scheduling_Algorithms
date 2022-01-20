@@ -1,24 +1,7 @@
-#include "FCFS.h"
+#include "RoundRobin.h"
 
-unsigned int findFirstProcessInQueue(Process *processes[],
-									 const unsigned int p_len,
-									 const bool status_period_0[p_len],
-									 const bool status_period_1[p_len])
-{
-	unsigned int minimum = UINT_MAX;
-	unsigned int index;
-	for (int i = 0; i < p_len; i++) {
-		if (getArrivalTime(processes[i]) < minimum && !(status_period_0[i] && status_period_1[i])) {
-			minimum = getArrivalTime(processes[i]);
-			index = i;
-		}
-	}
-	return index;
-}
-
-
-void FCFS(Process *processes[], const unsigned int p_len, unsigned int *finishedTime, unsigned int *responseTime,
-		  int *ganttChart)
+void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
+				unsigned int *finishedTime, unsigned int *responseTime, int *ganttChart)
 {
 	bool status_period_0[p_len];
 	bool status_period_1[p_len];
@@ -44,7 +27,6 @@ void FCFS(Process *processes[], const unsigned int p_len, unsigned int *finished
 			}
 			timeElapsed = getArrivalTime(processes[currentProcess]);
 		}
-
 		// The variable "period" identifies which burst time must happen.
 		bool period;
 		if (!status_period_0[currentProcess]) {
@@ -58,27 +40,36 @@ void FCFS(Process *processes[], const unsigned int p_len, unsigned int *finished
 		// It does NOT happen, but if we have unexpected values, it will exit.
 		else { exit(1); }
 
-		for (unsigned int t = timeElapsed; t < timeElapsed + getBurstTime(processes[currentProcess], period); t++) {
-			ganttChart[t] = (int) currentProcess;
+		if (getBurstTime(processes[currentProcess], period) >= quantum) {
+			for (unsigned int t = timeElapsed; t < timeElapsed + quantum; t++) {
+				ganttChart[t] = (int) currentProcess;
+			}
+			setBurstTime(processes[currentProcess], period,
+						 getBurstTime(processes[currentProcess], period) - quantum);
+
+			timeElapsed += quantum;
+			setArrivalTime(processes[currentProcess], timeElapsed);
+		}
+		else {
+			for (unsigned int t = timeElapsed; t < timeElapsed + getBurstTime(processes[currentProcess], period); t++) {
+				ganttChart[t] = (int) currentProcess;
+			}
+			timeElapsed += getBurstTime(processes[currentProcess], period);
+			setBurstTime(processes[currentProcess], period, 0);
 		}
 
-		timeElapsed += getBurstTime(processes[currentProcess], period);
-
-		// After the first period is done, we update the arrival time of the process with the time the process would
-		// come back from the IO.
-		if (period == 0) {
+		if (period == 0 && getBurstTime(processes[currentProcess], 0) == 0) {
 			status_period_0[currentProcess] = true;
 			setArrivalTime(processes[currentProcess], timeElapsed + getIOTime(processes[currentProcess]));
 		}
 
 		// After the second period is done, the process is finished, and we can store the time
 		// in which the process ended.
-		else {
+		if (period == 1 && getBurstTime(processes[currentProcess], 1) == 0) {
 			status_period_1[currentProcess] = true;
 			finishedTime[currentProcess] = timeElapsed;
 		}
 
-		// Checking if all processes have been completed.
 		bool flag = false;
 		for (int i = 0; i < p_len; i++) {
 			if (status_period_0[i] == false || status_period_1[i] == false) {

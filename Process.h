@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <limits.h>
 // struct Process;
 typedef struct Process Process;
 
@@ -22,4 +22,7 @@ void setIOTime(Process *process, unsigned int io_time);
 
 Process* createProcess(unsigned int pid, unsigned int at,
 					   unsigned int bt_1, unsigned int iot, unsigned int bt_2);
+
+unsigned int minArrivalTime(Process *processes[], unsigned int p_len);
+
 #endif //OS_PROJECT_CPU_SCHEDULING_ALGORITHMS_PROCESS_H

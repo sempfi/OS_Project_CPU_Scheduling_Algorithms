@@ -7,10 +7,11 @@
 #include <limits.h>
 #include "Process.h"
 
+
 void FCFS (
 		Process *processes[],
 		unsigned int p_len,
-		unsigned int *finishedTimeProcesses,
+		unsigned int *finishedTime,
 		unsigned int *responseTime,
 		int *ganttChart
 );
