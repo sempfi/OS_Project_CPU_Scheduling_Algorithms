@@ -1,24 +1,7 @@
 #include "FCFS.h"
 
-unsigned int findFirstProcessInQueue(Process *processes[],
-									 const unsigned int p_len,
-									 const bool status_period_0[p_len],
-									 const bool status_period_1[p_len])
-{
-	unsigned int minimum = UINT_MAX;
-	unsigned int index;
-	for (int i = 0; i < p_len; i++) {
-		if (getArrivalTime(processes[i]) < minimum && !(status_period_0[i] && status_period_1[i])) {
-			minimum = getArrivalTime(processes[i]);
-			index = i;
-		}
-	}
-	return index;
-}
-
-
-void FCFS(Process *processes[], const unsigned int p_len, unsigned int *finishedTime, unsigned int *responseTime,
-		  int *ganttChart)
+void FCFS(Process *processes[], const unsigned int p_len,
+		  unsigned int *finishedTime, unsigned int *responseTime, int *ganttChart)
 {
 	bool status_period_0[p_len];
 	bool status_period_1[p_len];
@@ -81,7 +64,7 @@ void FCFS(Process *processes[], const unsigned int p_len, unsigned int *finished
 		// Checking if all processes have been completed.
 		bool flag = false;
 		for (int i = 0; i < p_len; i++) {
-			if (status_period_0[i] == false || status_period_1[i] == false) {
+			if (!status_period_0[i] || !status_period_1[i]) {
 				flag = true;
 				break;
 			};

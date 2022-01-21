@@ -36,13 +36,3 @@ Process* createProcess(unsigned int pid, unsigned int at, unsigned int bt_1, uns
 	setBurstTime(process, 1, bt_2);
 	return process;
 }
-unsigned int minArrivalTime(Process *processes[], const unsigned int p_len)
-{
-	unsigned int minimum = UINT_MAX;
-	for (int i = 0; i < p_len; i++) {
-		if (getArrivalTime(processes[i]) < minimum) {
-			minimum = getArrivalTime(processes[i]);
-		}
-	}
-	return minimum;
-}

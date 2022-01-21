@@ -5,10 +5,13 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 {
 	bool status_period_0[p_len];
 	bool status_period_1[p_len];
+	bool allocatedOnce[p_len];
 	bool allFinished = false;
+
 	for (int i = 0; i < p_len; i++) {
 		status_period_0[i] = false;
 		status_period_1[i] = false;
+		allocatedOnce[i] = false;
 	}
 
 	unsigned int timeElapsed = minArrivalTime(processes, p_len);
@@ -17,6 +20,10 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 
 		// Retain the earliest process in the ready queue.
 		unsigned int currentProcess = findFirstProcessInQueue(processes, p_len, status_period_0, status_period_1);
+		if (!allocatedOnce[currentProcess]) {
+			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
+			allocatedOnce[currentProcess] = true;
+		}
 
 		// Checking if we have some idle CPU time by comparing the time in which the last process gave up the CPU,
 		// And the new process has arrived.
@@ -27,20 +34,19 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 			}
 			timeElapsed = getArrivalTime(processes[currentProcess]);
 		}
+
 		// The variable "period" identifies which burst time must happen.
 		bool period;
 		if (!status_period_0[currentProcess]) {
 			period = 0;
-			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
 		}
 		else if (status_period_0[currentProcess] && !status_period_1[currentProcess]) {
 			period = 1;
 		}
 
-		// It does NOT happen, but if we have unexpected values, it will exit.
 		else { exit(1); }
 
-		if (getBurstTime(processes[currentProcess], period) >= quantum) {
+		if (getBurstTime(processes[currentProcess], period) > quantum) {
 			for (unsigned int t = timeElapsed; t < timeElapsed + quantum; t++) {
 				ganttChart[t] = (int) currentProcess;
 			}
@@ -72,7 +78,7 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 
 		bool flag = false;
 		for (int i = 0; i < p_len; i++) {
-			if (status_period_0[i] == false || status_period_1[i] == false) {
+			if (!status_period_0[i] || !status_period_1[i]) {
 				flag = true;
 				break;
 			};

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
-// struct Process;
+
 typedef struct Process Process;
 
 unsigned int getProcessID(const Process *process);
@@ -20,9 +20,6 @@ void setBurstTime(Process *process, bool period, unsigned int burstTime);
 unsigned int getIOTime(const Process *process);
 void setIOTime(Process *process, unsigned int io_time);
 
-Process* createProcess(unsigned int pid, unsigned int at,
-					   unsigned int bt_1, unsigned int iot, unsigned int bt_2);
-
-unsigned int minArrivalTime(Process *processes[], unsigned int p_len);
+Process* createProcess(unsigned int pid, unsigned int at, unsigned int bt_1, unsigned int iot, unsigned int bt_2);
 
 #endif //OS_PROJECT_CPU_SCHEDULING_ALGORITHMS_PROCESS_H

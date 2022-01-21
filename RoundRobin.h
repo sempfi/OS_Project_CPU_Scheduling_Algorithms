@@ -6,11 +6,16 @@
 #include <stdlib.h>
 #include "Process.h"
 #include "FCFS.h"
+#include "utilities.h"
 
-void roundRobin(Process *processes[],
-				unsigned int p_len, unsigned int quantum,
-				unsigned int *finishedTime,
-				unsigned int *responseTime,
-				int *ganttChart);
+void roundRobin
+(
+		Process *processes[],
+		unsigned int p_len,
+		unsigned int quantum,
+		unsigned int *finishedTime,
+		unsigned int *responseTime,
+		int *ganttChart
+);
 
 #endif //OS_PROJECT_CPU_SCHEDULING_ALGORITHMS_ROUNDROBIN_H
