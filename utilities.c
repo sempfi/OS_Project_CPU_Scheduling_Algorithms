@@ -51,14 +51,17 @@ unsigned int findShortestProcess (Process *processes[], unsigned int p_len, unsi
 		return index;
 	}
 
+	minimum = UINT_MAX;
+
 	for (int i = 0; i < p_len; i++) {
-		if (getArrivalTime(processes[i]) - timeElapsed < minimum && !status_period_0[i] && !status_period_1[i]) {
-			minimum = getArrivalTime(processes[i]) - timeElapsed;
-			index = i;
-		} else if (getArrivalTime(processes[i]) - timeElapsed < minimum && status_period_0[i] && !status_period_1[i]) {
+		if (getArrivalTime(processes[i]) - timeElapsed < minimum && !(status_period_0[i] && status_period_1[i])) {
 			minimum = getArrivalTime(processes[i]) - timeElapsed;
 			index = i;
 		}
+//		else if (getArrivalTime(processes[i]) - timeElapsed < minimum && status_period_0[i] && !status_period_1[i]) {
+//			minimum = getArrivalTime(processes[i]) - timeElapsed;
+//			index = i;
+//		}
 	}
 	return index;
 }

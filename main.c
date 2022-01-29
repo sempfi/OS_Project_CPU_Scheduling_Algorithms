@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include "FCFS.h"
 #include "RoundRobin.h"
-#include "SJF.h"
+#include "SRTF.h"
 #include "MLFQ.h"
+#include "SJF.h"
 
 #define MAX_SIZE_PROCESSES 100
 #define MAX_SIZE_CHARS 100
@@ -26,7 +27,7 @@ void addProcess(Process *p)
 }
 
 void callFunction (
-		void (*ptr_FCFS_SJF)(Process **, const unsigned int,unsigned int *, unsigned int *, int *),
+		void (*ptr_FCFS_SJF_SRTF)(Process **, const unsigned int,unsigned int *, unsigned int *, int *),
 		void (*ptr_RR)(Process **, const unsigned int, const int unsigned, unsigned int *, unsigned int *, int *),
 		void (*ptr_MLFQ)(Process **, const unsigned int, const int unsigned, const unsigned int,
 				unsigned int *, unsigned int *, int *),
@@ -37,6 +38,7 @@ void callFunction (
 	unsigned int *finishedTime = (unsigned int*) malloc(sizeof(unsigned int) * p_len);
 	unsigned int *responseTime = (unsigned int*) malloc(sizeof(unsigned int) * p_len);
 	unsigned int arrivalTime[p_len];
+	unsigned int burstTime[2][p_len];
 	unsigned int waitingTime[p_len];
 	unsigned int turnaroundTime[p_len];
 	unsigned int totalWaitingTime = 0;
@@ -48,11 +50,13 @@ void callFunction (
 
 	for (int i = 0; i < p_len; i++) {
 		arrivalTime[i] = getArrivalTime(processes[i]);
+		burstTime[0][i] = getBurstTime(processes[i], 0);
+		burstTime[1][i] = getBurstTime(processes[i], 1);
 	}
 
-	if (strcmp(name, "FCFS") == 0 || strcmp(name, "SJF") == 0)
-		ptr_FCFS_SJF(processes, p_len, finishedTime, responseTime, ganttChart);
-	else if (strcmp(name, "Round Robin") == 0)
+	if (strcmp(name, "FCFS") == 0 || strcmp(name, "SJF") == 0 || strcmp(name, "SRTF") == 0)
+		ptr_FCFS_SJF_SRTF(processes, p_len, finishedTime, responseTime, ganttChart);
+	else if (strcmp(name, "RR") == 0)
 		ptr_RR(processes, p_len, quantum_RR, finishedTime, responseTime, ganttChart);
 	else if (strcmp(name, "MLFQ") == 0)
 		ptr_MLFQ(processes, p_len, quantum_0_MLFQ, quantum_1_MLFQ, finishedTime, responseTime, ganttChart);
@@ -61,9 +65,9 @@ void callFunction (
 		Process *p = processes[i];
 		waitingTime[i] = finishedTime[i] -
 				arrivalTime[i] -
-				getBurstTime(p, 0) -
+				burstTime[0][i] -
 				getIOTime(p) -
-				getBurstTime(p, 1);
+				burstTime[1][i];
 		turnaroundTime[i] = finishedTime[i] - arrivalTime[i];
 
 		totalTurnaroundTime += turnaroundTime[i];
@@ -103,7 +107,8 @@ void callFunction (
 
 void call_FCFS () { callFunction(FCFS, NULL, NULL, "FCFS" ); }
 void call_SJF  () { callFunction(SJF, NULL, NULL, "SJF");    }
-void call_RR () { callFunction(NULL, roundRobin, NULL, "Round Robin"); }
+void call_SRTF () { callFunction(SRTF, NULL, NULL, "SRTF"); }
+void call_RR () { callFunction(NULL, roundRobin, NULL, "RR"); }
 void call_MLFQ () { callFunction(NULL, NULL, MLFQ, "MLFQ"); }
 
 void readFile()
@@ -123,7 +128,7 @@ void readFile()
 int driver()
 {
 	readFile();
-	printf("Enter the method number (FCFS: 1, RR: 2, SJF: 3, MLFQ: 4):\n");
+	printf("Enter the method number (FCFS: 1, RR: 2, SJF: 3, SRTF: 4, MLFQ: 5):\n");
 	int mode;
 	scanf("%d", &mode);
 
@@ -131,7 +136,8 @@ int driver()
 		case 1: call_FCFS(); break;
 		case 2: call_RR(); break;
 		case 3: call_SJF(); break;
-		case 4: call_MLFQ(); break;
+		case 4: call_SRTF(); break;
+		case 5: call_MLFQ(); break;
 		default: break;
 	}
 	return 1;

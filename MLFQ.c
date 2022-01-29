@@ -28,10 +28,7 @@ void MLFQ(Process *processes[], unsigned int p_len, unsigned int quantum_0, unsi
 		unsigned int currentProcess = findFirstProcessInLevel(processes, p_len,
 															  isInLevel, level,
 															  status_period_0, status_period_1);
-		if (!allocatedOnce[currentProcess]) {
-			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
-			allocatedOnce[currentProcess] = true;
-		}
+
 		if (getArrivalTime(processes[currentProcess]) > timeElapsed) {
 			if (getArrivalTime(processes[findFirstProcessInLevel(processes, p_len, isInLevel, level+1,
 																 status_period_0, status_period_1)]) <= timeElapsed) {
@@ -48,8 +45,10 @@ void MLFQ(Process *processes[], unsigned int p_len, unsigned int quantum_0, unsi
 				timeElapsed = getArrivalTime(processes[currentProcess]);
 			}
 		}
-
-	//	printf("IN LEVEL%d: %d\n", level, currentProcess);
+		if (!allocatedOnce[currentProcess]) {
+			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
+			allocatedOnce[currentProcess] = true;
+		}
 
 		bool period;
 		if (!status_period_0[currentProcess]) {
@@ -81,7 +80,6 @@ void MLFQ(Process *processes[], unsigned int p_len, unsigned int quantum_0, unsi
 				timeElapsed += getBurstTime(processes[currentProcess], period);
 				setBurstTime(processes[currentProcess], period, 0);
 			}
-
 		}
 
 		else if (level == 2 && isInLevel[2][currentProcess]) {

@@ -2,7 +2,7 @@
 #define MAX_TIME 1000
 
 void SJF(Process *processes[], unsigned int p_len,
-		 unsigned int *finishedTime, unsigned int *responseTime, int *ganttChart)
+		  unsigned int *finishedTime, unsigned int *responseTime, int *ganttChart)
 {
 	bool status_period_0[p_len];
 	bool status_period_1[p_len];
@@ -19,10 +19,6 @@ void SJF(Process *processes[], unsigned int p_len,
 	while (!allFinished) {
 		unsigned int currentProcess = findShortestProcess(processes, p_len, timeElapsed,
 														  status_period_0, status_period_1);
-		if (!allocatedOnce[currentProcess]) {
-			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
-			allocatedOnce[currentProcess] = true;
-		}
 
 		if (getArrivalTime(processes[currentProcess]) > timeElapsed) {
 			for (unsigned int s = timeElapsed; s < getArrivalTime(processes[currentProcess]); s++) {
@@ -30,6 +26,11 @@ void SJF(Process *processes[], unsigned int p_len,
 				ganttChart[s] = -1;
 			}
 			timeElapsed = getArrivalTime(processes[currentProcess]);
+		}
+
+		if (!allocatedOnce[currentProcess]) {
+			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
+			allocatedOnce[currentProcess] = true;
 		}
 
 		// The variable "period" identifies which burst time must happen.
@@ -45,13 +46,15 @@ void SJF(Process *processes[], unsigned int p_len,
 			exit(1);
 		}
 
-		ganttChart[timeElapsed] = (int) currentProcess;
-		timeElapsed++;
+		for (unsigned int t = timeElapsed; t < timeElapsed + getBurstTime(processes[currentProcess], period); t++) {
+			ganttChart[t] = (int) currentProcess;
+		}
+
+		timeElapsed += getBurstTime(processes[currentProcess], period);
 
 		// After the first period is done, we update the arrival time of the process with the time the process would
 		// come back from the IO.
-		setBurstTime(processes[currentProcess], period,
-					 getBurstTime(processes[currentProcess], period)-1);
+		setBurstTime(processes[currentProcess], period,0);
 
 
 		if (period == 0 && getBurstTime(processes[currentProcess], 0) == 0) {

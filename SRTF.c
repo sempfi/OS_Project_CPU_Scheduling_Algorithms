@@ -1,13 +1,13 @@
-#include "RoundRobin.h"
+#include "SRTF.h"
+#define MAX_TIME 1000
 
-void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
-				unsigned int *finishedTime, unsigned int *responseTime, int *ganttChart)
+void SRTF(Process *processes[], unsigned int p_len,
+		 unsigned int *finishedTime, unsigned int *responseTime, int *ganttChart)
 {
 	bool status_period_0[p_len];
 	bool status_period_1[p_len];
-	bool allocatedOnce[p_len];
 	bool allFinished = false;
-
+	bool allocatedOnce[p_len];
 	for (int i = 0; i < p_len; i++) {
 		status_period_0[i] = false;
 		status_period_1[i] = false;
@@ -17,19 +17,17 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 	unsigned int timeElapsed = minArrivalTime(processes, p_len);
 
 	while (!allFinished) {
+		unsigned int currentProcess = findShortestProcess(processes, p_len, timeElapsed,
+														  status_period_0, status_period_1);
 
-		// Retain the earliest process in the ready queue.
-		unsigned int currentProcess = findFirstProcessInQueue(processes, p_len, status_period_0, status_period_1);
-
-		// Checking if we have some idle CPU time by comparing the time in which the last process gave up the CPU,
-		// And the new process has arrived.
 		if (getArrivalTime(processes[currentProcess]) > timeElapsed) {
-			for (unsigned int t = timeElapsed; t < getArrivalTime(processes[currentProcess]); t++) {
+			for (unsigned int s = timeElapsed; s < getArrivalTime(processes[currentProcess]); s++) {
 				// '-1' identifies idle state.
-				ganttChart[t] = -1;
+				ganttChart[s] = -1;
 			}
 			timeElapsed = getArrivalTime(processes[currentProcess]);
 		}
+
 		if (!allocatedOnce[currentProcess]) {
 			responseTime[currentProcess] = timeElapsed - getArrivalTime(processes[currentProcess]);
 			allocatedOnce[currentProcess] = true;
@@ -44,25 +42,18 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 			period = 1;
 		}
 
-		//else { exit(1); }
-
-		if (getBurstTime(processes[currentProcess], period) > quantum) {
-			for (unsigned int t = timeElapsed; t < timeElapsed + quantum; t++) {
-				ganttChart[t] = (int) currentProcess;
-			}
-			setBurstTime(processes[currentProcess], period,
-						 getBurstTime(processes[currentProcess], period) - quantum);
-
-			timeElapsed += quantum;
-			setArrivalTime(processes[currentProcess], timeElapsed);
-		}
 		else {
-			for (unsigned int t = timeElapsed; t < timeElapsed + getBurstTime(processes[currentProcess], period); t++) {
-				ganttChart[t] = (int) currentProcess;
-			}
-			timeElapsed += getBurstTime(processes[currentProcess], period);
-			setBurstTime(processes[currentProcess], period, 0);
+			exit(1);
 		}
+
+		ganttChart[timeElapsed] = (int) currentProcess;
+		timeElapsed++;
+
+		// After the first period is done, we update the arrival time of the process with the time the process would
+		// come back from the IO.
+		setBurstTime(processes[currentProcess], period,
+					 getBurstTime(processes[currentProcess], period)-1);
+
 
 		if (period == 0 && getBurstTime(processes[currentProcess], 0) == 0) {
 			status_period_0[currentProcess] = true;
@@ -76,9 +67,10 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 			finishedTime[currentProcess] = timeElapsed;
 		}
 
+
 		bool flag = false;
 		for (int i = 0; i < p_len; i++) {
-			if (!status_period_0[i] || !status_period_1[i]) {
+			if (status_period_0[i] == false || status_period_1[i] == false) {
 				flag = true;
 				break;
 			};
@@ -86,3 +78,4 @@ void roundRobin(Process *processes[], unsigned int p_len, unsigned int quantum,
 		allFinished = !flag;
 	}
 }
+
