@@ -15,6 +15,6 @@ void SJF
 		unsigned int *finishedTimeProcesses,
 		unsigned int *responseTime,
 		int *ganttChart
-		);
+);
 
 #endif //OS_PROJECT_CPU_SCHEDULING_ALGORITHMS_SJF_H
